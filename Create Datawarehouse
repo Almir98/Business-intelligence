@@ -1,0 +1,44 @@
+CREATE DATABASE prihodi_DW
+
+USE prihodi_DW
+
+CREATE TABLE DimOsoba
+(
+OsobaKey INT NOT NULL CONSTRAINT PK_OsobaKey PRIMARY KEY IDENTITY(1,1),
+OsobaID INT,
+PoslodavacID INT,
+GradID INT
+)
+
+CREATE TABLE DimTipRedovnogPrihoda
+(
+TipRedovnogPrihodaKey INT NOT NULL CONSTRAINT PK_TipRedovnogPrihodaKey PRIMARY KEY IDENTITY(1,1),
+TipRedovnogPrihodaID INT,
+NazivRedovnogPrihoda NVARCHAR(30)
+)
+
+CREATE TABLE DimKlasaRedovnogPrihodaNeto
+(
+KlasaRedovnogPrihodaNetoKey INT NOT NULL CONSTRAINT PK_KlasaRedovnogPrihodaNetoKey PRIMARY KEY IDENTITY(1,1),
+KlasaRedovnogPrihodaNetoID INT,
+NazivKlasaRedovnogPrihodaNeto NVARCHAR(20)
+)
+
+CREATE TABLE DimKlasaRedovnogPrihodaBruto
+(
+KlasaRedovnogPrihodaBrutoKey INT NOT NULL CONSTRAINT PK_KlasaRedovnogPrihodaBrutoKey PRIMARY KEY IDENTITY(1,1),
+KlasaRedovnogPrihodaBrutoID INT,
+NazivKlasaRedovnogPrihodaBruto NVARCHAR(20)
+)
+
+CREATE TABLE FactRedovniPrihodi
+(
+FactRedovniPrihodiKey INT NOT NULL CONSTRAINT PK_FactRedovniPrihodiKey PRIMARY KEY IDENTITY(1,1),
+OsobaKey INT NOT NULL CONSTRAINT FK_OsobaKey FOREIGN KEY REFERENCES DimOsoba(OsobaKey),
+TipRedovnogPrihodaKey INT NOT NULL CONSTRAINT FK_TipRedovnogPrihodaKey FOREIGN KEY REFERENCES DimTipRedovnogPrihoda(TipRedovnogPrihodaKey),
+KlasaRedovnogPrihodaNetoKey INT NOT NULL CONSTRAINT FK_KlasaRedovnogPrihodaNetoKey FOREIGN KEY REFERENCES DimKlasaRedovnogPrihodaNeto(KlasaRedovnogPrihodaNetoKey),
+KlasaRedovnogPrihodaBrutoKey INT NOT NULL CONSTRAINT FK_KlasaRedovnogPrihodaBrutoKey FOREIGN KEY REFERENCES DimKlasaRedovnogPrihodaBruto(KlasaRedovnogPrihodaBrutoKey),
+RedovniPrihodiID INT,
+RedovniPrihodi_Neto DECIMAL(6,2),
+RedovniPrihodi_Bruto DECIMAL(6,2),
+)
