@@ -43,3 +43,4 @@ RedovniPrihodi_Neto DECIMAL(6,2),
 RedovniPrihodi_Bruto DECIMAL(6,2),
 )
 
+
