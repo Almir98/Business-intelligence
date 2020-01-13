@@ -1,0 +1,108 @@
+USE prihodi
+
+ALTER TABLE vanr_prihodi
+ADD klasa_vanr_prihoda AS CAST
+(
+CASE
+WHEN iznos<1 THEN 1
+WHEN iznos>1000 AND iznos<=1500 THEN 2
+WHEN iznos>1500 AND iznos<=2000 THEN 3
+ELSE 4
+END AS INT
+)
+GO
+
+SELECT * FROM vanr_prihodi
+use prihodi
+--b
+
+ALTER TABLE vanr_prihodi
+ADD br_dana_do_isplate AS DATEDIFF(DAY,datum_obracuna,datum_isplate)
+GO
+
+
+--c
+
+CREATE TABLE klasa_vanr_prihoda 
+(
+klasa_vanr_prihID INT NOT NULL CONSTRAINT PK_klasa_ID PRIMARY KEY IDENTITY(1,1),
+naziv_klase_vanr_prih NVARCHAR(10)
+)
+
+--d
+
+INSERT INTO klasa_vanr_prihoda(naziv_klase_vanr_prih)
+values ('klasa1'),('klasa2'),('klasa3'),('klasa4')
+GO
+
+SELECT * FROM klasa_vanr_prihoda
+
+
+
+-- PRAVI SE DW SAD
+
+CREATE DATABASE vanr_prihodi_DW
+GO
+
+USE vanr_prihodi_DW
+
+
+CREATE TABLE DimOsoba
+(
+OsobaKey INT NOT NULL CONSTRAINT PK_OsobaKey PRIMARY KEY IDENTITY(1,1),
+OsobaID INT,
+naziv_drzave VARCHAR(50) NULL,
+naziv_regije VARCHAR(50) NULL,
+naziv_grada VARCHAR(50) NULL
+)
+GO
+
+
+CREATE TABLE DimTipVanrednogPrihoda
+(
+tip_vanr_prihodaKey INT NOT NULL CONSTRAINT PK_tipVanr PRIMARY KEY IDENTITY(1,1),
+tip_vanr_prihoda INT,
+naziv_prihoda VARCHAR(50)
+)
+GO
+
+
+CREATE TABLE DimKlasaVanrednogPrihoda
+(
+klasa_vanr_prihodaKey INT NOT NULL CONSTRAINT PK_klasa_vanr PRIMARY KEY IDENTITY(1,1),
+klasa_vanr_prihodaID INT,
+naziv_klase_vanr_prihoda NVARCHAR(20)
+)
+GO
+
+
+
+CREATE TABLE DimBrDanaDoIsplate
+(
+BrDanaDoIsplateKey INT NOT NULL CONSTRAINT PK_brdana PRIMARY KEY IDENTITY(1,1),
+BrDanaDoIsplateID int 
+)
+GO
+
+-- FACT
+
+CREATE TABLE FactVanredniPrihodi
+(
+FactVanredniPrihodiKey INT NOT NULL CONSTRAINT PK_Fact PRIMARY KEY IDENTITY(1,1),
+OsobaKey INT CONSTRAINT FK_OsobaKey FOREIGN KEY REFERENCES DimOsoba(OsobaKey),
+TipVanrednogPrihodaKey INT CONSTRAINT FK_tipVandrednog FOREIGN KEY REFERENCES DimTipVanrednogPrihoda(tip_vanr_prihodaKey),
+KlasaVanrednogPrihodaKey INT CONSTRAINT FK_klasavandre FOREIGN KEY REFERENCES DimKlasaVanrednogPrihoda(klasa_vanr_prihodaKey),
+BrDanaDoIsplateKey INT CONSTRAINT FK_brdanadoispate FOREIGN KEY REFERENCES DimBrDanaDoIsplate(BrDanaDoIsplateKey),
+VanredniPrihodiID INT,
+Iznos decimal(6,2)
+)
+GO
+
+
+select * from DimOsoba		--850 zapisa
+
+select * from DimTipVanrednogPrihoda		--2 zapisa
+
+select * from DimKlasaVanrednogPrihoda		--4 zapisa
+
+select * from 	DimBrDanaDoIsplate	--4 zapisa
