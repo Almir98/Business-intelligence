@@ -1,0 +1,167 @@
+CREATE DATABASE publikacija2_DW
+
+USE publikacija2_DW
+
+--1
+
+SELECT *
+INTO dim_forma_pub
+FROM publikacije.dbo.forma_pub
+
+--6 zapisa u DIM_forma_pub se prebaci
+
+SELECT * FROM dim_forma_pub
+
+ALTER TABLE dim_forma_pub
+ADD FormaKey INT NOT NULL CONSTRAINT PK_FormaKey PRIMARY KEY IDENTITY(1,1)
+
+DROP TABLE dim_forma_pub
+
+-- SAD IDEMO NA NACIN DA JE MI PRAVIMO PA JE PUNIMO PUTEM SSDT-a
+
+CREATE TABLE dim_forma_pub
+(
+FormaKey INT NOT NULL CONSTRAINT PK_FormaKey PRIMARY KEY IDENTITY(1,1),
+forma_pub_ID INT,
+forma_pub_naziv NVARCHAR(50),
+max_duz_zadr INT
+)
+GO
+---------------------------------------------------------------------
+
+--2 dim_zanr
+
+SELECT * 
+INTO dim_zanr
+FROM publikacije.dbo.zanr
+
+--15 zapisa se dodalo 
+
+SELECT * FROM dim_zanr
+
+ALTER TABLE dim_zanr
+ADD ZanrKey INT NOT NULL CONSTRAINT PK_ZanrKey PRIMARY KEY IDENTITY(1,1)
+
+DROP TABLE dim_zanr
+
+
+-- SAD IDEMO NA NACIN DA JE MI PRAVIMO PA JE PUNIMO PUTEM SSDT-a
+
+CREATE TABLE dim_zanr
+(
+ZanrKey INT NOT NULL CONSTRAINT PK_ZanrKey PRIMARY KEY IDENTITY(1,1),
+ZanrID INT,
+zanr_naziv NVARCHAR(50)
+)
+---------------------------------------------------------------------
+
+-- 3	dim_autor
+
+SELECT A.autor_ID,G.naziv_grada,A.spol,PA.pub_ID
+INTO dim_autor
+FROM publikacije.dbo.autor AS A INNER JOIN publikacije.dbo.grad AS G
+	ON A.grad_autora_ID=G.grad_ID
+INNER JOIN publikacije.dbo.pub_autor AS PA
+	ON A.autor_ID=PA.autor_ID
+
+-- 444 ZAPISA JE DODANO dim_autor
+
+ALTER TABLE dim_autor
+ADD AutorKey INT NOT NULL CONSTRAINT PK_AutorKey PRIMARY KEY IDENTITY(1,1)
+
+SELECT * FROM dim_autor
+
+DROP TABLE dim_autor
+
+-- SAD IDEMO NA NACIN DA JE MI PRAVIMO PA JE PUNIMO PUTEM SSDT-a
+
+CREATE TABLE dim_autor
+(
+AutorKey INT NOT NULL CONSTRAINT PK_AutorKey PRIMARY KEY IDENTITY(1,1),
+AutorID INT,
+naziv_grada NVARCHAR(30),
+spol_autora NVARCHAR(1),
+Pub_ID INT
+)
+
+---------------------------------------------------------------------
+
+--4 dim_citalac
+
+SELECT C.citalac_ID,G.naziv_grada,C.spol,I.dtm_podizanja,I.dtm_vracanja,I.br_dana_zadr,I.pub_ID
+INTO dim_citalac
+FROM publikacije.dbo.citalac AS C INNER JOIN publikacije.dbo.grad AS G
+	ON C.grad_citaoca_ID=G.grad_ID
+INNER JOIN publikacije.dbo.izajmljivanje as I
+	ON C.citalac_ID=I.citalac_ID
+
+--1000 zapisa 
+
+SELECT * FROM dim_citalac
+
+ALTER TABLE dim_citalac
+ADD CitalacKey INT NOT NULL CONSTRAINT PK_CitalacKey PRIMARY KEY IDENTITY(1,1)
+
+DROP TABLE dim_citalac
+
+-- SAD IDEMO NA NACIN DA JE MI PRAVIMO PA JE PUNIMO PUTEM SSDT-a
+
+CREATE TABLE dim_citalac
+(
+CitalacKey INT NOT NULL CONSTRAINT PK_CitalacKey PRIMARY KEY IDENTITY(1,1),
+CitalacID INT,
+Naziv_grada NVARCHAR(50),
+Spol_citaoca NVARCHAR(1),
+dtm_podizanja DATETIME,
+dtm_vracanja DATETIME,
+br_dana_zadr INT,
+PubID INT
+)
+---------------------------------------------------------------------
+
+--5 dim_izdavac
+
+SELECT I.izdavac_ID,G.naziv_grada,I.naziv_izdavaca
+INTO dim_izdavac
+FROM publikacije.dbo.izdavac AS I INNER JOIN publikacije.dbo.grad AS G
+	ON I.grad_izdavaca_ID=G.grad_ID
+
+--30 ZAPISA DODANO
+
+SELECT * FROM dim_izdavac
+
+ALTER TABLE dim_izdavac
+ADD IzdavacKey INT NOT NULL CONSTRAINT PK_IzdavacKey PRIMARY KEY IDENTITY(1,1)
+
+DROP TABLE dim_izdavac
+
+-- SAD IDEMO NA NACIN DA JE MI PRAVIMO PA JE PUNIMO PUTEM SSDT-a
+
+CREATE TABLE dim_izdavac
+(
+IzdavacKey INT NOT NULL CONSTRAINT PK_IzdavacKey PRIMARY KEY IDENTITY(1,1),
+IzdavacID INT,
+Naziv_grada_izdavaca NVARCHAR(50),
+naziv_izdavaca NVARCHAR(50)
+)
+
+---------------------------------------------------------------------
+
+-- FACT TABELA
+
+CREATE TABLE fact_publikacija
+(
+FactKey INT NOT NULL CONSTRAINT PK_FactKey PRIMARY KEY IDENTITY(1,1),
+FormaKey INT CONSTRAINT FK_FormaKey FOREIGN KEY REFERENCES dim_forma_pub(FormaKey),		--1
+ZanrKey INT CONSTRAINT FK_ZanrKey FOREIGN KEY REFERENCES dim_zanr(ZanrKey),			--2
+AutorKey INT CONSTRAINT FK_AutorKey FOREIGN KEY REFERENCES dim_autor(AutorKey),		--3
+CitalacKey INT CONSTRAINT FK_CitalacKey FOREIGN KEY REFERENCES dim_citalac(CitalacKey),	--4
+IzdavacKey INT CONSTRAINT FK_izdavacKey FOREIGN KEY REFERENCES dim_izdavac(IzdavacKey),		--5
+PubID INT,
+naziv_pub NVARCHAR(50),
+ISBN NVARCHAR(25),
+cijena FLOAT
+)
+
+
+SELECT * FROM fact_publikacija
