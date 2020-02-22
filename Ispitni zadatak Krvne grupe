@@ -1,0 +1,44 @@
+CREATE DATABASE darivatelji_DW
+
+USE darivatelji_DW
+
+USE darivatelji
+
+alter authorization on database::darivatelji to sa
+
+CREATE TABLE dim_darivatelj
+(
+Dim_DarivateljKEY INT NOT NULL CONSTRAINT PK_darivatelj primary key identity(1,1),
+DarivateljID INT,
+KrvnaGrupa nvarchar(5),
+AkcijaID INT
+)
+
+CREATE TABLE dim_osoblje
+(
+Dim_OsobljeKEY INT NOT NULL CONSTRAINT PK_Osoblje primary key identity(1,1),
+OsobljeID int,
+AkcijaID int,
+DatumAkcije date
+)
+
+CREATE TABLE dim_sluzba
+(
+Dim_SlizbaKEY INT NOT NULL CONSTRAINT PK_Sluzba primary key identity(1,1),
+SluzbaID INT,
+NazivBolnice nvarchar(30),
+NazivSluzbe nvarchar(50),
+)
+
+CREATE TABLE fact_akcija_sluzba
+(
+FactKEY INT NOT NULL CONSTRAINT PK_Fact PRIMARY KEY IDENTITY(1,1),
+DarivateljKey INT CONSTRAINT FK_DarivateljKey FOREIGN KEY REFERENCES dim_darivatelj(Dim_DarivateljKEY),
+OsobljeKey INT CONSTRAINT FK_OsobljeKey FOREIGN KEY REFERENCES dim_osoblje(Dim_OsobljeKEY),
+SluzbaKey INT CONSTRAINT FK_SluzbaKey FOREIGN KEY REFERENCES dim_sluzba(Dim_SlizbaKEY),
+
+AkcijaID INT,
+SluzbaID INT,
+BrojDoza INT,
+Ukupno INT
+)
